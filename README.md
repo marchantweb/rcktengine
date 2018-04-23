@@ -1,5 +1,5 @@
 # "RCKT Engine" Active Record Model
-A better active record implementation for CodeIngiter 3. Supports easy initialization, deep caching, automatic formatting, just-in-time methods, and post load formatting/calculations.
+**A better active record implementation for CodeIgniter 3.** Supports easy initialization, deep caching, automatic formatting, just-in-time methods, and post load formatting/calculations.
 
 ---
 
