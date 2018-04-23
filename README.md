@@ -41,6 +41,8 @@ class product_model extends RCKT_Model {
 
 Make sure you've either added the new model to your autoload, or that you're calling it in the specific controller you plan to work in. Otherwise CI won't load it.
 
+In our example, we'll be creating a model for our products table, loaded using: `$this->load->model('Product_model');`
+
 #### Loading a Record from the Database
 
 You can either pass an integer representing the primary key in the database for a particular product, or an array of properties to search for the record.
