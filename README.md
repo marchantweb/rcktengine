@@ -1,5 +1,5 @@
 # "RCKT Engine" Active Record Model
-A better active record implementation for CodeIngiter 3. Supports easy initialization, just-in-time methods, and post load formatting/calculations.
+A better active record implementation for CodeIngiter 3. Supports easy initialization, deep caching, just-in-time methods, and post load formatting/calculations.
 
 ---
 
@@ -29,7 +29,7 @@ class product_model extends RCKT_Model {
 
 Make sure you've either added the new model to your autoload, or that you're calling it in the specific controller you plan to work in. Otherwise CI won't load it.
 
-#### Loading a Record
+#### Loading a Record from the Database
 
 You can either pass an integer representing the primary key in the database for a particular product, or an array of properties to search for the record.
 
@@ -44,6 +44,21 @@ $product = new Product_model($search);
 // Error Handling
 if( ! $product){
   // Could not load product ID #17 or find using search
+}
+```
+
+#### Populating a Record from PHP Data
+
+Sometimes you've already got the data within CI, and don't want to make another trip to your database by calling load(ID). In this case, you can use the populate() method to create an object using local data. Usually this is done when you're already looping through rows from a database query.
+
+```
+$query = $this->db->query("YOUR SELECT QUERY");
+
+foreach ($query->result() as $row){
+	$product = new Product_model();
+	$product->populate($row);
+	// Make some changes
+	$product->save();
 }
 ```
 
@@ -66,7 +81,7 @@ $product->save();
 
 #### Updating Records
 
-Updating records is just as easy, just load the record first.
+Updating records is easy - just load the record, make changes, and save it.
 
 ```
 // Load my Product
@@ -81,6 +96,60 @@ $product->save();
 ```
 **Notice we use the same save() function to push the data back to the database.** RCKT Engine will automatically determine whether to insert or update the database based on whether you've already loaded an existing record into the object.
 
+#### Deleting Records
+
+To delete a record, simply load it and call the delete() method.
+
+```
+// Load my Product
+$product = new Product_model(17);
+
+// Delete it
+$product->delete();
+```
+
 ---
 
-Used extensively at https://www.telemetric.io/ - a free tool to monitor MySQL databases daily.
+## Formatting and Calculations
+
+Sometimes you'll want to run some logic after loading a record from the database. For example, we might want to create a pretty currency-formatted version of our product pricing every time we load a product. To do so, create a post_load() function in your model.
+
+```
+public function post_load(){
+	return TRUE;
+}
+```
+This method must return TRUE - or else the load will not complete. If it returns FALSE, it will be assumed the data for the selected record did not pass some sort of validation in post_load and it will not be available for further usage/editing. In that case, the entire object will simply return FALSE;
+
+Here's an example where we format the title of the product and the price:
+```
+public function post_load(){
+	$this->formatted_title = ucwords(strtolower($this->title));
+	$this->formatted_price = "$".number_format($this->price, 2, '.', '');
+	return TRUE;
+}
+```
+**Note: Do not replace your original properties unless you are okay with the updated value getting saved back to the database if you were to call save() later.** For example, you wouldn't want to save formatted_price back to price, as it would convert the float value to a string in your database - and likely cause errors. I'd recommend prefixing modified values with either `formatted_` or `display_` so that you can keep them separate from native columns.
+
+You can also create properties with names that don't match your database columns. Only properties declared as fields in your DB_FIELDS_SETUP array will ever be saved back to the database.
+
+---
+
+## Deep Caching
+
+An extensive data cache is built into RCKT Engine, and doesn't require any additional work on your part. Whenever an object is created, a reference to it's table and ID is stored in memory. Whenever you attempt to load that table and ID again, it will pull the object from the cache, instead of from your database.
+
+For example:
+```
+$product = new Product_model(17);
+$product = new Product_model(17);
+$product = new Product_model(17);
+$product = new Product_model(17);
+$product = new Product_model(17);
+
+// Only one query to the database was made. The other 4 requests used the cached version.
+```
+The cache will work when using load() from either primary key ID or from a search array. The populate method does not use the caching system, as the data is already loaded locally.
+
+---
+Please feel free to submit any pull requests, and enjoy! Also, check out our other free project for software developers over at https://www.telemetric.io/ - a free tool to monitor MySQL databases daily.
