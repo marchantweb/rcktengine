@@ -110,7 +110,7 @@ $product->delete();
 
 ---
 
-## Formatting and Calculations
+## Formatting and Calculations (Post_Load)
 
 Sometimes you'll want to run some logic after loading a record from the database. For example, we might want to create a pretty currency-formatted version of our product pricing every time we load a product. To do so, create a post_load() function in your model.
 
@@ -135,6 +135,49 @@ You can also create properties with names that don't match your database columns
 
 ---
 
+## JIT (Just-in-Time) Methods
+
+Often times you want to perform extensive calculations, or pull data from associated tables, after loading a record from the database - but this can be CPU intensive and time-consuming to perform every time you load the data. That's where JIT (just-in-time) methods come in.
+
+JIT methods work similarly to the post_load, in that you can perform calculations, format data, or do anything you want - and they return TRUE if successful. **The big difference between post_load and JIT methods is that post_load gets called instantly every time, versus JIT getting called manually before you need the data.**
+
+Setting up a JIT method looks like this in your model:
+
+```
+public function JIT_get_all_associated_transactions(){
+	// Heavy calculations or data loading, such as loading an array of 1,000 transactions where people purchased this product
+	$this->transactions = array(...)
+	// return TRUE;
+}
+```
+**To make any method a JIT method, just prefix it with JIT_ and return TRUE**
+
+Then you would call the function by simply calling (without the prefix):
+```
+$myrecord->get_all_associated_transactions();
+```
+
+JIT methods return a reference to the object itself, so you can chain the request.
+
+Here's an example where we don't need transaction data, so we don't load the JIT function
+
+```
+// Don't need JIT, just looking up basic product details (maybe for a product listing page)
+$product = new Product_model(17);
+```
+
+And now we need the transaction data, so we can use JIT to get that...
+
+```
+// So let's do this more resource-intensive task as JIT
+foreach($product->get_all_associated_transactions()->transactions as $transaction){
+	// Do something with each transaction
+}
+
+```
+
+JIT method formatting is cached after the first time it's called, so you can called it 100 times in a row and don't need to worry about it re-doing the work.
+
 ## Deep Caching
 
 An extensive data cache is built into RCKT Engine, and doesn't require any additional work on your part. Whenever an object is created, a reference to it's table and ID is stored in memory. Whenever you attempt to load that table and ID again, it will pull the object from the cache, instead of from your database.
@@ -149,7 +192,7 @@ $product = new Product_model(17);
 
 // Only one query to the database was made. The other 4 requests used the cached version.
 ```
-The cache will work when using load() from either primary key ID or from a search array. The populate method does not use the caching system, as the data is already loaded locally.
+The cache will work when using load() from either primary key ID or from a search array. The populate method does not use the caching system, as the data is already loaded locally. JIT functions are also cached after they run once.
 
 ---
 Please feel free to submit any pull requests, and enjoy! Also, check out our other free project for software developers over at https://www.telemetric.io/ - a free tool to monitor MySQL databases daily.
