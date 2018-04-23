@@ -1,5 +1,5 @@
 # "RCKT Engine" Active Record Model
-A better active record implementation for CodeIngiter 3. Supports easy initialization, deep caching, just-in-time methods, and post load formatting/calculations.
+A better active record implementation for CodeIngiter 3. Supports easy initialization, deep caching, automatic formatting, just-in-time methods, and post load formatting/calculations.
 
 ---
 
@@ -177,6 +177,14 @@ foreach($product->get_all_associated_transactions()->transactions as $transactio
 ```
 
 JIT method formatting is cached after the first time it's called, so you can called it 100 times in a row and don't need to worry about it re-doing the work.
+
+## Automatic Formatting
+
+RCKT Engine automatically formats some properties when it sees them as columns in your database. Those include first name `$this->first`, last name `$this->last`, email `$this->email`, and phone number `$this->phone`.
+
+It also automatically creates an ID property `$this->ID` that is equal to your primary key ID, so that you can always write code using `$myproduct->ID` regardless of what your primary key is called.
+
+Lastly, a html-encoded JSON representation of the data is created under the property `$this->JSON_REPRESENTATION`. You could use this to provide simply API access or to easily move data to client-side programming such as jQuery.
 
 ## Deep Caching
 
