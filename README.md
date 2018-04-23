@@ -1,5 +1,17 @@
 # "RCKT Engine" Active Record Model
-**A better active record implementation for CodeIgniter 3.** Supports easy initialization, deep caching, automatic formatting, just-in-time methods, and post load formatting/calculations.
+**A better active record implementation for CodeIgniter 3.**
+
+CodeIgniter provides a query builder library for abstracting database access inside of models, but no overall method by which to implement direct Active Record, meaning, a one-to-one relationship between models and their respective database tables.
+
+RCKT Engine is an active model built for CodeIgniter that's been tried and tested to scale on some rather large and complex projects. The idea is development speed - using a one-to-one relationship while adding additional functionality such as post load formatting and just-in-time data processing.
+
+#### Core features of RCKT Engine's Active Record Model:
+
+* Easy initialization (get setup in seconds)
+* Deep caching (minimize database queries)
+* Automatic formatting (do less work)
+* Just-in-time methods (only get data if it's needed)
+* Post load formatting/calculations (adjust your data before you use it)
 
 ---
 
