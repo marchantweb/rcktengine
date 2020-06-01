@@ -23,7 +23,7 @@ Copy `application/core/RCKT_Model.php` into your `application/core` directory.
 
 To implement the active record system, simply create a new model using the basic structure below. Make sure to extend the RCKT_Model class instead of the typical CI_Model.
 
-```
+```php
 class product_model extends RCKT_Model {
 	
 	// Setup
@@ -47,7 +47,7 @@ In our example, we'll be creating a model for our products table, loaded using: 
 
 You can either pass an integer representing the primary key in the database for a particular product, or an array of properties to search for the record.
 
-```
+```php
 // Load using ID
 $product = new Product_model(17);
 
@@ -65,7 +65,7 @@ if( ! $product){
 
 Sometimes you've already got the data within CI, and don't want to make another trip to your database by calling load(ID). In this case, you can use the populate() method to create an object using local data. Usually this is done when you're already looping through rows from a database query.
 
-```
+```php
 $query = $this->db->query("YOUR SELECT QUERY");
 
 foreach ($query->result() as $row){
@@ -80,7 +80,7 @@ foreach ($query->result() as $row){
 
 Creating a record is as simple as creating a new object without passing an ID. Then to edit, simply change the properties of the object and call the save() function. Only columns (properties) declared in DB_FIELDS_SETUP can be saved back to the database.
 
-```
+```php
 // Create a New Object
 $product = new Product_model();
 
@@ -97,7 +97,7 @@ $product->save();
 
 Updating records is easy - just load the record, make changes, and save it.
 
-```
+```php
 // Load my Product
 $product = new Product_model(17);
 
@@ -114,7 +114,7 @@ $product->save();
 
 To delete a record, simply load it and call the delete() method.
 
-```
+```php
 // Load my Product
 $product = new Product_model(17);
 
@@ -128,7 +128,7 @@ $product->delete();
 
 Sometimes you'll want to run some logic after loading a record from the database. For example, we might want to create a pretty currency-formatted version of our product pricing every time we load a product. To do so, create a post_load() function in your model.
 
-```
+```php
 public function post_load(){
 	return TRUE;
 }
@@ -136,7 +136,7 @@ public function post_load(){
 This method must return TRUE - or else the load will not complete. If it returns FALSE, it will be assumed the data for the selected record did not pass some sort of validation in post_load and it will not be available for further usage/editing. In that case, the entire object will simply return FALSE;
 
 Here's an example where we format the title of the product and the price:
-```
+```php
 public function post_load(){
 	$this->formatted_title = ucwords(strtolower($this->title));
 	$this->formatted_price = "$".number_format($this->price, 2, '.', '');
@@ -157,7 +157,7 @@ JIT methods work similarly to the post_load, in that you can perform calculation
 
 Setting up a JIT method looks like this in your model:
 
-```
+```php
 public function JIT_get_all_associated_transactions(){
 	// Heavy calculations or data loading, such as loading an array of 1,000 transactions where people purchased this product
 	$this->transactions = array(...)
@@ -167,7 +167,7 @@ public function JIT_get_all_associated_transactions(){
 **To make any method a JIT method, just prefix it with JIT_ and return TRUE**
 
 Then you would call the function by simply calling (without the prefix):
-```
+```php
 $myrecord->get_all_associated_transactions();
 ```
 
@@ -175,14 +175,14 @@ JIT methods return a reference to the object itself, so you can chain the reques
 
 Here's an example where we don't need transaction data, so we don't load the JIT function
 
-```
+```php
 // Don't need JIT, just looking up basic product details (maybe for a product listing page)
 $product = new Product_model(17);
 ```
 
 And now we need the transaction data, so we can use JIT to get that...
 
-```
+```php
 // So let's do this more resource-intensive task as JIT
 foreach($product->get_all_associated_transactions()->transactions as $transaction){
 	// Do something with each transaction
@@ -205,7 +205,7 @@ Lastly, a html-encoded JSON representation of the data is created under the prop
 An extensive data cache is built into RCKT Engine, and doesn't require any additional work on your part. Whenever an object is created, a reference to it's table and ID is stored in memory. Whenever you attempt to load that table and ID again, it will pull the object from the cache, instead of from your database.
 
 For example:
-```
+```php
 $product = new Product_model(17);
 $product = new Product_model(17);
 $product = new Product_model(17);
